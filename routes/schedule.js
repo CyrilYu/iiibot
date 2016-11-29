@@ -16,15 +16,15 @@ router.get(API.LIST, async function (ctx, next) {
   }
   ctx.body = [{
     id: 1,
-    schedule: moment().add(1, 'hour').format('HH:mm:ss')
+    schedule: moment().add(1, 'hour').format('HH:00:00')
   },
   {
     id: 2,
-    schedule: moment().add(2, 'hour').format('HH:mm:ss')
+    schedule: moment().add(2, 'hour').format('HH:00:00')
   },
   {
     id: 3,
-    schedule: moment().add(3, 'hour').format('HH:mm:ss')
+    schedule: moment().add(3, 'hour').format('HH:00:00')
   }]
 })
 

@@ -16,7 +16,6 @@ router.post(API.SIGNIN, async function (ctx, next) {
   ctx.checkBody('thirdPartyId').notEmpty('thirdPartyId should not be empty').isInt()
   ctx.checkBody('thirdPartyToken').notEmpty('thirdPartyToken should not be empty')
   ctx.checkBody('pushToken').optional()
-  ctx.checkBody('image').optional()
   ctx.checkBody('platform').notEmpty('platform should not be empty')
   ctx.checkBody('serialNum').notEmpty('serialNum should not be empty')
 
@@ -43,11 +42,8 @@ router.post(API.SIGNIN, async function (ctx, next) {
 })
 
 router.patch(API.UPDATE, function (ctx, next) {
-  ctx.checkHeader('authorization').notEmpty()
-  ctx.checkParams('id').notEmpty()
   ctx.checkBody('username').optional()
   ctx.checkBody('pushToken').optional()
-  ctx.checkBody('image').optional()
 
   const errors = ctx.errors
   if (errors) {

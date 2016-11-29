@@ -15,18 +15,12 @@ export default (sequelize, DataType) => {
       allowNull: false
     },
     keyword: {
-      type: DataType.STRING
+      type: DataType.STRING,
+      allowNull: true
     },
     schedule: {
       type: DataType.INTEGER,
       allowNull: false
-    },
-    serial_num: {
-      type: DataType.STRING,
-      allowNull: false
-    },
-    deleted_at: {
-      type: DataType.DATE
     }
   }, {
     timestamps: false,

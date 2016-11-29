@@ -30,3 +30,8 @@ CREATE TABLE Topics (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 );
+
+insert into topics(name) values ('3C');
+insert into topics(name) values ('美妝');
+insert into topics(name) values ('教育');
+insert into topics(name) values ('金融');

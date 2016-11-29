@@ -3,7 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import Sequelize from 'sequelize'
 
-const connect = 'mariadb://root:1qaz2wsx@localhost:3306/iiibot'
+const connect = ''
 
 // create db connection
 const sequelize = new Sequelize(connect, { logging: true })

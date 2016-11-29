@@ -31,6 +31,16 @@ CREATE TABLE Topics (
   PRIMARY KEY (id)
 );
 
+CREATE TABLE News (
+  id MEDIUMINT NOT NULL AUTO_INCREMENT,
+  topic_id MEDIUMINT NOT NULL,
+  url VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+);
+
 insert into topics(name) values ('3C');
 insert into topics(name) values ('美妝');
 insert into topics(name) values ('教育');

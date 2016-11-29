@@ -1,7 +1,9 @@
 import moment from 'moment'
+import Promise from 'bluebird'
 import _ from 'lodash'
 import {
-  subscriptions as Subscription
+  subscriptions as Subscription,
+  news as News
 } from '../models'
 var router = require('koa-router')()
 
@@ -25,8 +27,15 @@ router.get(API.QUERY, async function (ctx, next) {
   _.each(ctx.request.query.id, id => {
     ids.push(id)
   })
-  const result = await Subscription.findAll({ where: { id: { $in: ids } } })
-  ctx.body = result
+  const data = await Subscription.findAll({ where: { id: { $in: ids } } })
+
+  return Promise.map(data, record => {
+    const topic_id = record.topic
+    const keyword  = record.keyword || ''
+    return News.findAll({ where: { topic_id: topic_id, title: { $like: `%${keyword}%` } } })
+  }).then(res => {
+    ctx.body = res
+  })
 })
 
 router.get(API.LIST, async function (ctx, next) {

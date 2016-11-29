@@ -1,5 +1,6 @@
 var router = require('koa-router')()
 const moment = require('moment')
+import { users as User } from '../models'
 
 const API = {
   SIGNIN: '/sign_in',
@@ -7,7 +8,7 @@ const API = {
   QUERY: '/'
 }
 
-router.post(API.SIGNIN, function (ctx, next) {
+router.post(API.SIGNIN, async function (ctx, next) {
 
   ctx.checkBody('username').notEmpty('username should not be empty')
   ctx.checkBody('email').notEmpty('email should not be empty').isEmail()
@@ -15,6 +16,7 @@ router.post(API.SIGNIN, function (ctx, next) {
   ctx.checkBody('thirdPartyId').notEmpty('thirdPartyId should not be empty').isInt()
   ctx.checkBody('thirdPartyToken').notEmpty('thirdPartyToken should not be empty')
   ctx.checkBody('pushToken').optional()
+  ctx.checkBody('image').optional()
   ctx.checkBody('platform').notEmpty('platform should not be empty')
   ctx.checkBody('serialNum').notEmpty('serialNum should not be empty')
 
@@ -25,19 +27,23 @@ router.post(API.SIGNIN, function (ctx, next) {
     return
   }
 
-  const auth_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
-  const user_id = Math.floor(Math.random() * 100) + 1
-  const username = ctx.request.body.username
-  ctx.body = {
-    auth_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
-    user_id: Math.floor(Math.random() * 100) + 1,
-    user_name: username,
-    expiry_date: moment().add(1, 'day').format()
+  const spec = ctx.request.body
+
+  const obj = {
+    name: spec.username,
+    email: spec.email,
+    provider: spec.provider,
+    auth_token: spec.thirdPartyToken,
+    platform: spec.platform,
+    serial_num: spec.serialNum
   }
+
+  const user = await User.create(obj)
+  ctx.body = user
 })
 
 router.patch(API.UPDATE, function (ctx, next) {
-  ctx.checkHeader('Authorization').notEmpty()
+  ctx.checkHeader('authorization').notEmpty()
   ctx.checkParams('id').notEmpty()
   ctx.checkBody('username').optional()
   ctx.checkBody('pushToken').optional()
@@ -49,16 +55,20 @@ router.patch(API.UPDATE, function (ctx, next) {
     ctx.body   = errors
     return
   }
-
   ctx.status = 201
 })
 
-router.get(API.QUERY, function (ctx, next) {
-  ctx.body = {
-    id: Math.floor(Math.random() * 100) + 1,
-    email: 'cyrilyu.tw@gmail.com',
-    username: 'Cyril Yu'
+router.get(API.QUERY, async function (ctx, next) {
+  ctx.checkHeader('authorization').notEmpty()
+  const errors = ctx.errors
+  if (errors) {
+    ctx.status = 400
+    ctx.body   = errors
+    return
   }
+  const token = ctx.request.header.authorization
+  const user = await User.findOne({ where: { auth_token: token } })
+  ctx.body = user
 })
 
 module.exports = router

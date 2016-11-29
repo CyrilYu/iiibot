@@ -38,6 +38,7 @@ router.post(API.ADD, async function (ctx, next) {
     ctx.body = errors
     return
   }
+
   console.log(ctx.request.body.schedule)
   // console.log(moment(ctx.request.body.schedule, 'HH:mm:ssZ').isValid())
   // if (!moment(ctx.request.body.schedule, 'HH:mm:ssZ').isValid()) {

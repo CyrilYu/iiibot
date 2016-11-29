@@ -1,36 +1,22 @@
 import moment from 'moment'
+import { topics as Topic } from '../models' 
 var router = require('koa-router')()
 
 const API = {
-  LIST: '/list',
-  ADD: '/add'
+  LIST: '/list'
 }
 
-router.get(API.LIST, function (ctx, next) {
-  ctx.checkHeader('auth_token').notEmpty('auth token should not be empty.')
-  const errors = ctx.errors
-  if (errors) {
-    ctx.status = 400
-    ctx.body = errors
-    return
-  }
-  ctx.body = [{
-    id: Math.floor(Math.random() * 100) + 1,
-    topic: 'Politics'
-  },
-  {
-    id: Math.floor(Math.random() * 100) + 1,
-    topic: 'World'
-  }]
-})
-
-router.post(API.ADD, async function (ctx, next) {
-  ctx.status = 201
-  ctx.body = {
-    id: 'test3',
-    topic: 'GDG Talk',
-    schedule: moment().format()
-  }
+router.get(API.LIST, async function (ctx, next) {
+  // ctx.checkHeader('auth_token').notEmpty('auth token should not be empty.')
+  // const errors = ctx.errors
+  // if (errors) {
+  //   ctx.status = 400
+  //   ctx.body = errors
+  //   return
+  // }
+  
+  const topics = await Topic.findAll({ attributes: ['id', 'name'] })
+  ctx.body = topics
 })
 
 module.exports = router

@@ -1,12 +1,12 @@
+require('./models')
+
 const Koa = require('koa')
 const app = new Koa()
 const cors = require('kcors')
 const router = require('koa-router')()
 const views = require('koa-views')
-const co = require('co')
 const convert = require('koa-convert')
 const json = require('koa-json')
-const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')()
 const logger = require('koa-logger')
 
@@ -14,6 +14,7 @@ const index = require('./routes/index')
 const users = require('./routes/users')
 const subscription = require('./routes/subscription')
 const schedule = require('./routes/schedule')
+const topic = require('./routes/topic')
 
 // use validate middleware
 require('koa-validate')(app)
@@ -42,6 +43,7 @@ router.use('/', index.routes(), index.allowedMethods())
 router.use('/users', users.routes(), users.allowedMethods())
 router.use('/subscription', subscription.routes(), subscription.allowedMethods())
 router.use('/schedule', schedule.routes(), schedule.allowedMethods())
+router.use('/topic', topic.routes(), topic.allowedMethods())
 
 app.use(router.routes(), router.allowedMethods())
 // response

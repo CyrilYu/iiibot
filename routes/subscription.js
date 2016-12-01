@@ -2,6 +2,7 @@ import moment from 'moment'
 import Promise from 'bluebird'
 import jwt from 'jsonwebtoken'
 import _ from 'lodash'
+import config from '../config'
 import {
   users as User,
   subscriptions as Subscription,
@@ -17,9 +18,10 @@ const API = {
   DELETE: '/:id'
 }
 
-const secretkey = 'iiibot@Diuit'
+const secretkey = config.secretkey
 
 router.get(API.QUERY, async function (ctx, next) {
+  ctx.checkHeader('authorization').notEmpty()
   ctx.checkQuery('id').notEmpty()
   const errors = ctx.errors
   if (errors) {
@@ -27,6 +29,18 @@ router.get(API.QUERY, async function (ctx, next) {
     ctx.body   = errors
     return
   }
+
+  const header = ctx.request.header
+  const token  = header.authorization
+  // verify jwt
+  try {
+    jwt.verify(token, secretkey)
+  } catch (err) {
+    ctx.status = 401
+    ctx.body   = err.message
+    return
+  }
+
   const ids = []
   _.each(ctx.request.query.id, id => {
     ids.push(id)
@@ -62,9 +76,7 @@ router.get(API.LIST, async function (ctx, next) {
     ctx.body   = err.message
     return
   }
-
   const user = await User.findOne({ where: { auth_token: token } })
-  console.log(user)
   if (!user) {
     ctx.status = 401
     return
@@ -86,13 +98,13 @@ router.post(API.ADD, async function (ctx, next) {
   }
   const token  = ctx.request.header.authorization
   // verify jwt
-  // try {
-  //   jwt.verify(token, secretkey)
-  // } catch (err) {
-  //   ctx.status = 401
-  //   ctx.body   = err.message
-  //   return
-  // }
+  try {
+    jwt.verify(token, secretkey)
+  } catch (err) {
+    ctx.status = 401
+    ctx.body   = err.message
+    return
+  }
 
   const spec = ctx.request.body
   const user = await User.findOne({ where: { auth_token: token } })

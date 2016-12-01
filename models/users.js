@@ -17,8 +17,17 @@ export default (sequelize, DataType) => {
       type: DataType.STRING,
       allowNull: false
     },
-    image: {
-      type: DataType.STRING
+    third_party_id: {
+      type: DataType.STRING,
+      allowNull: false
+    },
+    third_party_token: {
+      type: DataType.STRING,
+      allowNull: false
+    },
+    provider: {
+      type: DataType.STRING,
+      allowNull: false
     },
     platform: {
       type: DataType.STRING,

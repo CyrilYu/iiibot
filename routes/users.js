@@ -1,5 +1,6 @@
 var router = require('koa-router')()
 const moment = require('moment')
+const jwt = require('jsonwebtoken')
 import { users as User } from '../models'
 
 const API = {
@@ -13,7 +14,7 @@ router.post(API.SIGNIN, async function (ctx, next) {
   ctx.checkBody('username').notEmpty('username should not be empty')
   ctx.checkBody('email').notEmpty('email should not be empty').isEmail()
   ctx.checkBody('provider').notEmpty('provider should not be empty')
-  ctx.checkBody('thirdPartyId').notEmpty('thirdPartyId should not be empty').isInt()
+  ctx.checkBody('thirdPartyId').notEmpty('thirdPartyId should not be empty')
   ctx.checkBody('thirdPartyToken').notEmpty('thirdPartyToken should not be empty')
   ctx.checkBody('pushToken').optional()
   ctx.checkBody('platform').notEmpty('platform should not be empty')
@@ -28,22 +29,39 @@ router.post(API.SIGNIN, async function (ctx, next) {
 
   const spec = ctx.request.body
 
-  const obj = {
-    name: spec.username,
+  const authToken = jwt.sign({
     email: spec.email,
-    provider: spec.provider,
-    auth_token: spec.thirdPartyToken,
-    platform: spec.platform,
-    serial_num: spec.serialNum
-  }
+    serial: spec.serialNum
+  }, 'iiibot@Diuit', { expiresIn: '1m' })
 
-  const user = await User.create(obj)
-  ctx.body = user
+  let user = await User.findOne({
+    where: {
+      email: spec.email,
+      platform: spec.platform,
+      serial_num: spec.serialNum
+    }
+  })
+
+  if (user) {
+    user.auth_token = authToken
+    user = await user.save()
+    ctx.body = user
+  } else {
+    user = await User.create({
+      name: spec.username,
+      email: spec.email,
+      provider: spec.provider,
+      auth_token: authToken,
+      platform: spec.platform,
+      serial_num: spec.serialNum
+    })
+    ctx.body = user
+  }
 })
 
 router.patch(API.UPDATE, function (ctx, next) {
-  ctx.checkBody('username').optional()
-  ctx.checkBody('pushToken').optional()
+  ctx.checkHeader('authorization').notEmpty()
+  ctx.checkBody('pushToken').notEmpty()
 
   const errors = ctx.errors
   if (errors) {

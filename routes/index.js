@@ -17,7 +17,7 @@ router.get('/', async function (ctx, next) {
   })
 })
 
-router.post(API.SIGNIN, async function (ctx, next) {
+router.post(API.SIGN_IN, async function (ctx, next) {
 
   ctx.checkBody('username').notEmpty('username should not be empty')
   ctx.checkBody('email').notEmpty('email should not be empty').isEmail()

@@ -3,7 +3,6 @@ var router = require('koa-router')()
 import { users as User } from '../models'
 
 const API = {
-  SIGNIN: '/sign_in',
   UPDATE: '/:id',
   QUERY: '/'
 }

@@ -4,10 +4,6 @@ const config = require('../config')
 
 import { users as User } from '../models'
 
-const API = {
-  SIGN_IN: '/sign_in'
-}
-
 router.get('/', async function (ctx, next) {
   ctx.state = {
     title: 'IIIBOT'
@@ -17,8 +13,8 @@ router.get('/', async function (ctx, next) {
   })
 })
 
-router.post(API.SIGN_IN, async function (ctx, next) {
-
+router.post('sign_in', async function (ctx, next) {
+  console.log('=========')
   ctx.checkBody('username').notEmpty('username should not be empty')
   ctx.checkBody('email').notEmpty('email should not be empty').isEmail()
   ctx.checkBody('provider').notEmpty('provider should not be empty')
@@ -60,6 +56,8 @@ router.post(API.SIGN_IN, async function (ctx, next) {
     user = await User.create({
       name: spec.username,
       email: spec.email,
+      third_party_id: spec.thirdPartyId,
+      third_party_token: spec.thirdPartyToken,
       provider: spec.provider,
       auth_token: authToken,
       platform: spec.platform,

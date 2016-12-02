@@ -17,6 +17,12 @@ export default (sequelize, DataType) => {
     title: {
       type: DataType.STRING,
       allowNull: false
+    },
+    updated_at: {
+      type: DataType.DATE
+    },
+    created_at: {
+      type: DataType.DATE
     }
   }, {
     timestamps: false,

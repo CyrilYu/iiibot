@@ -6,7 +6,6 @@ const API = {
 }
 
 router.get(API.LIST, async function (ctx, next) {
-  console.log(ctx.request.header)
   ctx.checkHeader('authorization').notEmpty()
   const errors = ctx.errors
   if (errors) {

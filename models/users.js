@@ -43,6 +43,12 @@ export default (sequelize, DataType) => {
     },
     push_token: {
       type: DataType.STRING
+    },
+    updated_at: {
+      type: DataType.DATE
+    },
+    created_at: {
+      type: DataType.DATE
     }
   }, {
     timestamps: false,

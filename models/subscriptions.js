@@ -21,6 +21,12 @@ export default (sequelize, DataType) => {
     schedule: {
       type: DataType.INTEGER,
       allowNull: false
+    },
+    updated_at: {
+      type: DataType.DATE
+    },
+    created_at: {
+      type: DataType.DATE
     }
   }, {
     timestamps: false,

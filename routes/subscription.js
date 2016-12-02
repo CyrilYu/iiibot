@@ -19,6 +19,7 @@ const API = {
 }
 
 const secretkey = config.secretkey
+const topics = ['3C', 'education', 'financial', 'makeups']
 
 router.get(API.QUERY, async function (ctx, next) {
   ctx.checkHeader('authorization').notEmpty()
@@ -29,9 +30,13 @@ router.get(API.QUERY, async function (ctx, next) {
     ctx.body   = errors
     return
   }
-
-  const header = ctx.request.header
-  const token  = header.authorization
+  const parts = ctx.request.header.authorization.split(' ')
+  const type  = parts[0]
+  const token = parts[1]
+  if (type !== 'Bearer') {
+    ctx.status = 401
+    return
+  }
   // verify jwt
   try {
     jwt.verify(token, secretkey)
@@ -65,9 +70,13 @@ router.get(API.LIST, async function (ctx, next) {
     ctx.body = errors
     return
   }
-
-  const header = ctx.request.header
-  const token  = header.authorization
+  const parts = ctx.request.header.authorization.split(' ')
+  const type  = parts[0]
+  const token = parts[1]
+  if (type !== 'Bearer') {
+    ctx.status = 401
+    return
+  }
   // verify jwt
   try {
     jwt.verify(token, secretkey)
@@ -96,7 +105,13 @@ router.post(API.ADD, async function (ctx, next) {
     ctx.body = errors
     return
   }
-  const token  = ctx.request.header.authorization
+  const parts = ctx.request.header.authorization.split(' ')
+  const type  = parts[0]
+  const token = parts[1]
+  if (type !== 'Bearer') {
+    ctx.status = 401
+    return
+  }
   // verify jwt
   try {
     jwt.verify(token, secretkey)
@@ -112,6 +127,13 @@ router.post(API.ADD, async function (ctx, next) {
     ctx.status = 401
     return
   }
+
+  if (!_.includes(topics, spec.topic)) {
+    ctx.status = 400
+    ctx.body   = 'invalid topic type'
+    return
+  }
+
   const obj = {
     user_id: user.id,
     topic: spec.topic,
@@ -131,6 +153,21 @@ router.delete(API.DELETE, async function (ctx, next) {
   if (errors) {
     ctx.status = 400
     ctx.body   = errors
+    return
+  }
+  const parts = ctx.request.header.authorization.split(' ')
+  const type  = parts[0]
+  const token = parts[1]
+  if (type !== 'Bearer') {
+    ctx.status = 401
+    return
+  }
+  // verify jwt
+  try {
+    jwt.verify(token, secretkey)
+  } catch (err) {
+    ctx.status = 401
+    ctx.body   = err.message
     return
   }
   const result = await Subscription.destroy({ where: { id: ctx.params.id } })

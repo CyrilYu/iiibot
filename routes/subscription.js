@@ -146,6 +146,46 @@ router.post(API.ADD, async function (ctx, next) {
   ctx.body   = sub
 })
 
+router.patch(API.UPDATE, async function (ctx, next) {
+  ctx.checkHeader('authorization').notEmpty()
+  ctx.checkBody('daily_schedule').notEmpty()
+
+  const errors = ctx.errors
+  if (errors) {
+    ctx.status = 400
+    ctx.body   = errors
+    return
+  }
+
+  const parts = ctx.request.header.authorization.split(' ')
+  const type  = parts[0]
+  const token = parts[1]
+  if (type !== 'Bearer') {
+    ctx.status = 401
+    return
+  }
+  // verify jwt
+  try {
+    jwt.verify(token, secretkey)
+  } catch (err) {
+    ctx.status = 401
+    ctx.body   = err.message
+    return
+  }
+
+  const subscription = await Subscription.findOne({ where: { id: ctx.params.id } })
+  if (!subscription) {
+    ctx.status = 400
+    ctx.body   = 'subscription not found'
+    return
+  }
+
+  subscription.schedule = ctx.request.body.daily_schedule
+  subscription.save()
+  ctx.status = 201
+  return
+})
+
 router.delete(API.DELETE, async function (ctx, next) {
   ctx.checkHeader('authorization').notEmpty()
   ctx.checkParams('id').notEmpty()

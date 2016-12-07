@@ -19,7 +19,7 @@ export default (sequelize, DataType) => {
       allowNull: true
     },
     schedule: {
-      type: DataType.INTEGER,
+      type: DataType.STRING,
       allowNull: false
     },
     updated_at: {

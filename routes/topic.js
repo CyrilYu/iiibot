@@ -1,19 +1,18 @@
-import moment from 'moment'
-import _ from 'lodash'
-import jwt from 'jsonwebtoken'
-import config from '../config'
+const router = require('koa-router')()
+const _ = require('lodash')
 import {
   news as News
 } from '../models' 
-var router = require('koa-router')()
+
 
 const API = {
+  LIST: '/list',
   QUERY: '/query'
 }
-const secretkey = config.secretkey
-const topics = ['3C', 'education', 'financial', 'makeups']
 
-router.post(API.QUERY, async function (ctx, next) {
+const topics = ['3c', 'education', 'financial', 'makeups']
+
+router.post(API.QUERY, async function (ctx) {
   ctx.checkBody('topic').notEmpty()
   ctx.checkBody('keyword').optional()
 

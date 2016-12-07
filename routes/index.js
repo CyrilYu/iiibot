@@ -4,7 +4,7 @@ const config = require('../config')
 
 import { users as User } from '../models'
 
-router.get('/', async function (ctx, next) {
+router.get('/', async function (ctx) {
   ctx.state = {
     title: 'IIIBOT'
   }
@@ -13,7 +13,7 @@ router.get('/', async function (ctx, next) {
   })
 })
 
-router.post('sign_in', async function (ctx, next) {
+router.post('sign_in', async function (ctx) {
   ctx.checkBody('username').notEmpty('username should not be empty')
   ctx.checkBody('email').notEmpty('email should not be empty').isEmail()
   ctx.checkBody('provider').notEmpty('provider should not be empty')

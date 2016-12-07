@@ -13,8 +13,8 @@ const logger = require('koa-logger')
 const index = require('./routes/index')
 const users = require('./routes/users')
 const subscription = require('./routes/subscription')
-const schedule = require('./routes/schedule')
 const topic = require('./routes/topic')
+const news = require('./routes/news')
 
 // use validate middleware
 require('koa-validate')(app)
@@ -42,8 +42,8 @@ app.use(async (ctx, next) => {
 router.use('/', index.routes(), index.allowedMethods())
 router.use('/users', users.routes(), users.allowedMethods())
 router.use('/subscription', subscription.routes(), subscription.allowedMethods())
-router.use('/schedule', schedule.routes(), schedule.allowedMethods())
 router.use('/topic', topic.routes(), topic.allowedMethods())
+router.use('/news', news.routes(), news.allowedMethods())
 
 app.use(router.routes(), router.allowedMethods())
 // response

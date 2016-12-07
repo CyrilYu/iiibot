@@ -1,14 +1,12 @@
-import moment from 'moment'
-import Promise from 'bluebird'
-import jwt from 'jsonwebtoken'
-import _ from 'lodash'
-import config from '../config'
+const router = require('koa-router')()
+const Promise = require('bluebird')
+const _ = require('lodash')
+import { authenticate } from './utils'
 import {
   users as User,
   subscriptions as Subscription,
   news as News
 } from '../models'
-var router = require('koa-router')()
 
 const API = {
   QUERY: '/query',
@@ -18,31 +16,15 @@ const API = {
   DELETE: '/:id'
 }
 
-const secretkey = config.secretkey
-const topics = ['3C', 'education', 'financial', 'makeups']
+const topics = ['3c', 'education', 'financial', 'makeups']
 
-router.get(API.QUERY, async function (ctx, next) {
+router.get(API.QUERY, async function (ctx) {
   ctx.checkHeader('authorization').notEmpty()
   ctx.checkQuery('id').notEmpty()
   const errors = ctx.errors
   if (errors) {
     ctx.status = 400
     ctx.body   = errors
-    return
-  }
-  const parts = ctx.request.header.authorization.split(' ')
-  const type  = parts[0]
-  const token = parts[1]
-  if (type !== 'Bearer') {
-    ctx.status = 401
-    return
-  }
-  // verify jwt
-  try {
-    jwt.verify(token, secretkey)
-  } catch (err) {
-    ctx.status = 401
-    ctx.body   = err.message
     return
   }
 
@@ -61,8 +43,7 @@ router.get(API.QUERY, async function (ctx, next) {
   })
 })
 
-router.get(API.LIST, async function (ctx, next) {
-  // ctx.checkHeader('x-crawler-header').notEmpty().eq('application/crawler.v1')
+router.get(API.LIST, async function (ctx) {
   ctx.checkHeader('authorization').notEmpty()
   const errors = ctx.errors
   if (errors) {
@@ -73,18 +54,13 @@ router.get(API.LIST, async function (ctx, next) {
   const parts = ctx.request.header.authorization.split(' ')
   const type  = parts[0]
   const token = parts[1]
-  if (type !== 'Bearer') {
-    ctx.status = 401
+  const credential = authenticate(type, token)
+  if (!credential.isValid) {
+    ctx.status = credential.errCode
+    ctx.body   = credential.message
     return
   }
-  // verify jwt
-  try {
-    jwt.verify(token, secretkey)
-  } catch (err) {
-    ctx.status = 401
-    ctx.body   = err.message
-    return
-  }
+
   const user = await User.findOne({ where: { auth_token: token } })
   if (!user) {
     ctx.status = 401
@@ -94,7 +70,7 @@ router.get(API.LIST, async function (ctx, next) {
   ctx.body = list
 })
 
-router.post(API.ADD, async function (ctx, next) {
+router.post(API.ADD, async function (ctx) {
   ctx.checkHeader('authorization').notEmpty()
   ctx.checkBody('topic').notEmpty('topic should not be empty.')
   ctx.checkBody('keyword').optional()
@@ -108,16 +84,10 @@ router.post(API.ADD, async function (ctx, next) {
   const parts = ctx.request.header.authorization.split(' ')
   const type  = parts[0]
   const token = parts[1]
-  if (type !== 'Bearer') {
-    ctx.status = 401
-    return
-  }
-  // verify jwt
-  try {
-    jwt.verify(token, secretkey)
-  } catch (err) {
-    ctx.status = 401
-    ctx.body   = err.message
+  const credential = authenticate(type, token)
+  if (!credential.isValid) {
+    ctx.status = credential.errCode
+    ctx.body   = credential.message
     return
   }
 
@@ -125,28 +95,26 @@ router.post(API.ADD, async function (ctx, next) {
   const user = await User.findOne({ where: { auth_token: token } })
   if (!user) {
     ctx.status = 401
+    ctx.body   = 'User not found'
     return
   }
-
   if (!_.includes(topics, spec.topic)) {
     ctx.status = 400
     ctx.body   = 'invalid topic type'
     return
   }
-
   const obj = {
     user_id: user.id,
     topic: spec.topic,
     keyword: spec.keyword || '',
-    schedule: moment().add(1, 'hour').format('HH:00:00')
+    daily_schedule: spec.daily_schedule
   }
-
   const sub = await Subscription.create(obj)
   ctx.status = 201
   ctx.body   = sub
 })
 
-router.patch(API.UPDATE, async function (ctx, next) {
+router.patch(API.UPDATE, async function (ctx) {
   ctx.checkHeader('authorization').notEmpty()
   ctx.checkBody('daily_schedule').notEmpty()
 
@@ -160,16 +128,10 @@ router.patch(API.UPDATE, async function (ctx, next) {
   const parts = ctx.request.header.authorization.split(' ')
   const type  = parts[0]
   const token = parts[1]
-  if (type !== 'Bearer') {
-    ctx.status = 401
-    return
-  }
-  // verify jwt
-  try {
-    jwt.verify(token, secretkey)
-  } catch (err) {
-    ctx.status = 401
-    ctx.body   = err.message
+  const credential = authenticate(type, token)
+  if (!credential.isValid) {
+    ctx.status = credential.errCode
+    ctx.body   = credential.message
     return
   }
 
@@ -186,7 +148,7 @@ router.patch(API.UPDATE, async function (ctx, next) {
   return
 })
 
-router.delete(API.DELETE, async function (ctx, next) {
+router.delete(API.DELETE, async function (ctx) {
   ctx.checkHeader('authorization').notEmpty()
   ctx.checkParams('id').notEmpty()
   const errors = ctx.errors
@@ -195,24 +157,21 @@ router.delete(API.DELETE, async function (ctx, next) {
     ctx.body   = errors
     return
   }
+
   const parts = ctx.request.header.authorization.split(' ')
   const type  = parts[0]
   const token = parts[1]
-  if (type !== 'Bearer') {
-    ctx.status = 401
+  const credential = authenticate(type, token)
+  if (!credential.isValid) {
+    ctx.status = credential.errCode
+    ctx.body   = credential.message
     return
   }
-  // verify jwt
-  try {
-    jwt.verify(token, secretkey)
-  } catch (err) {
-    ctx.status = 401
-    ctx.body   = err.message
-    return
-  }
+
   const result = await Subscription.destroy({ where: { id: ctx.params.id } })
   ctx.status = 200
   ctx.body   = result
 })
+
 
 module.exports = router

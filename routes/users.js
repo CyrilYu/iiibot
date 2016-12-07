@@ -1,15 +1,13 @@
-var router = require('koa-router')()
-import jwt from 'jsonwebtoken'
-import config from '../config'
+const router = require('koa-router')()
+import { authenticate } from './utils'
 import { users as User } from '../models'
 
 const API = {
   UPDATE: '/:id',
   QUERY: '/'
 }
-const secretkey = config.secretkey
 
-router.patch(API.UPDATE, async function (ctx, next) {
+router.patch(API.UPDATE, async function (ctx) {
   ctx.checkHeader('authorization').notEmpty()
   ctx.checkBody('pushToken').notEmpty()
 
@@ -22,16 +20,10 @@ router.patch(API.UPDATE, async function (ctx, next) {
   const parts = ctx.request.header.authorization.split(' ')
   const type  = parts[0]
   const token = parts[1]
-  if (type !== 'Bearer') {
-    ctx.status = 401
-    return
-  }
-  // verify jwt
-  try {
-    jwt.verify(token, secretkey)
-  } catch (err) {
-    ctx.status = 401
-    ctx.body   = err.message
+  const credential = authenticate(type, token)
+  if (!credential.isValid) {
+    ctx.status = credential.errCode
+    ctx.body   = credential.message
     return
   }
 
@@ -50,7 +42,7 @@ router.patch(API.UPDATE, async function (ctx, next) {
   }
 })
 
-router.get(API.QUERY, async function (ctx, next) {
+router.get(API.QUERY, async function (ctx) {
   ctx.checkHeader('authorization').notEmpty()
   const errors = ctx.errors
   if (errors) {
@@ -58,7 +50,15 @@ router.get(API.QUERY, async function (ctx, next) {
     ctx.body   = errors
     return
   }
-  const token = ctx.request.header.authorization
+  const parts = ctx.request.header.authorization.split(' ')
+  const type  = parts[0]
+  const token = parts[1]
+  const credential = authenticate(type, token)
+  if (!credential.isValid) {
+    ctx.status = credential.errCode
+    ctx.body   = credential.message
+    return
+  }
   const user = await User.findOne({ where: { auth_token: token } })
   ctx.body = user
 })

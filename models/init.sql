@@ -19,7 +19,7 @@ CREATE TABLE subscriptions (
   user_id MEDIUMINT NOT NULL,
   topic VARCHAR(255) NOT NULL,
   keyword VARCHAR(255),
-  schedule TINYINT NOT NULL,
+  schedule VARCHAR(255) NOT NULL,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
@@ -35,23 +35,19 @@ CREATE TABLE topics (
 
 CREATE TABLE news (
   id MEDIUMINT NOT NULL AUTO_INCREMENT,
-  topic_id VARCHAR(100) NOT NULL,
+  topic VARCHAR(100) NOT NULL,
   url VARCHAR(255) NOT NULL,
   title VARCHAR(255) NOT NULL,
+  image_url VARCHAR(255),
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 );
 
-insert into topics(id, name) values ('3C', '3C');
+insert into topics(id, name) values ('3c', '3c');
 insert into topics(id, name) values ('education', '教育');
 insert into topics(id, name) values ('financial', '金融');
 insert into topics(id, name) values ('makeups', '美妝');
-
-insert into topics(name) values ('3C');
-insert into topics(name) values ('美妝');
-insert into topics(name) values ('教育');
-insert into topics(name) values ('金融');
 
 insert into subscriptions (user_id, topic, keyword, schedule) values (1, '2', '眼影', 14);
 insert into subscriptions (user_id, topic, keyword, schedule) values (1, '2', '無阻', 14);

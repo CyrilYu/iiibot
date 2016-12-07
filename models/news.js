@@ -6,7 +6,7 @@ export default (sequelize, DataType) => {
       primaryKey: true,
       autoIncrement: true
     },
-    topic_id: {
+    topic: {
       type: DataType.INTEGER,
       allowNull: false,
     },
@@ -17,6 +17,9 @@ export default (sequelize, DataType) => {
     title: {
       type: DataType.STRING,
       allowNull: false
+    },
+    image_url: {
+      type: DataType.STRING
     },
     updated_at: {
       type: DataType.DATE
